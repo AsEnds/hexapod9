@@ -8,7 +8,7 @@ from utils.logger_tools import logger
 # 确保项目根目录在 sys.path 中
 sys.path.append('/home/pi/SpiderPi/')
 
-import Joystick as js
+import Joystick2 as js
 import Controller as controller
 
 def start_threads():

@@ -16,8 +16,8 @@ from utils.logger_tools import logger
 
 # 按键按下回调
 def on_PSB_CROSS_press():
-    print("\nat joystick_cb, CROSS_PRESS\n\n")
-    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    #print("\nat joystick_cb, on_PSB_CROSS_press\n\n")
+    logger.debug("\nat joystick_cb, on_PSB_CROSS_press\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (('gait_prg.set_body_position', Position3(10,0,0)),
@@ -31,6 +31,7 @@ def on_PSB_CROSS_press():
 
 
 def on_PSB_CIRCLE_press():
+    logger.debug("\nat joystick_cb, on_PSB_CIRCLE_press\n\n")
     cmd_queue.put(
                 {
                     'mode' : 'manual',
@@ -42,8 +43,9 @@ def on_PSB_CIRCLE_press():
 
 
 def on_PSB_SQUARE_press():
-    print("\nat joystick_cb, CROSS_PRESS\n\n")
-    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, on_PSB_SQUARE_press\n\n")
+    # print("\nat joystick_cb, CROSS_PRESS\n\n")
+    # logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (('gait_prg.set_body_position', Position3(10,0,0)),
@@ -52,8 +54,9 @@ def on_PSB_SQUARE_press():
                   )
 
 def on_PSB_TRIANGLE_press():
-    print("\nat joystick_cb, CROSS_PRESS\n\n")
-    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, on_PSB_TRIANGLE_press\n\n")
+    # print("\nat joystick_cb, CROSS_PRESS\n\n")
+    # logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (('gait_prg.set_body_position', Position3(10,0,0)),)
@@ -61,8 +64,9 @@ def on_PSB_TRIANGLE_press():
                   )
 
 def on_PSB_L1_press():
-    print("\nat joystick_cb, CROSS_PRESS\n\n")
-    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, on_PSB_L1_press\n\n")
+    # print("\nat joystick_cb, CROSS_PRESS\n\n")
+    # logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (('gait_prg.set_body_position', Position3(10,0,0)),)
@@ -71,19 +75,19 @@ def on_PSB_L1_press():
 
 
 def on_PSB_R1_press():
-    pass
+    logger.debug("\nat joystick_cb, on_PSB_R1_press\n\n")
 
 def on_PSB_L2_press():
-    pass
+    logger.debug("\nat joystick_cb, on_PSB_L2_press\n\n")
 
 def on_PSB_R2_press():
-    pass
+    logger.debug("\nat joystick_cb, on_PSB_R2_press\n\n")
 
 def on_PSB_SELECT_press():
-    pass
+    logger.debug("\nat joystick_cb, on_PSB_SELECT_press\n\n")
 
 def on_PSB_START_press():
-    pass
+    logger.debug("\nat joystick_cb, on_PSB_START_press\n\n")
 
 
 
@@ -112,6 +116,7 @@ def on_RIGHT_STICK_press(x, y):
 
 # 统一的按键松开回调
 def on_button_release():
+    logger.debug("\nat joystick_cb, on_button_release\n\n")
     # pod.button_release()
     cmd_queue.put({
                         'mode' : 'auto',

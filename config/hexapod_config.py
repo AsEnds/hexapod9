@@ -94,6 +94,6 @@ class HexapodConfig:
         self.legs           = data["legs"]
         self.angle_offsets  = data["angle_offsets"]
         
-        logger.debug(f"\n\n at HexapodConfig,\n,self.dir_offsets={self.dir_offsets},\nself.legs={self.legs},\nself.angle_offsets={self.angle_offsets}")
+        logger.debug(f"\nat HexapodConfig,\n,self.dir_offsets={self.dir_offsets},\nself.legs={self.legs},\nself.angle_offsets={self.angle_offsets}\n\n")
         
         
