@@ -117,7 +117,11 @@ class Controller:
 
     def handle_set_entry(self, target_path, value):
         """
-        按路径设置属性，支持 Position3/Velocity 解包及普通属性赋值。
+        按路径设置属性或调用方法。
+
+        - 若目标是 :class:`Position3` 或 :class:`Velocity` 实例，可传入
+          ``list``/``tuple`` 进行解包赋值。
+        - 若目标为可调用对象，则将 ``value`` 作为参数执行。
         """
         obj = self
         parts = target_path.split(".")
@@ -127,13 +131,27 @@ class Controller:
         final = parts[-1]
         existing = getattr(obj, final)
 
-        if isinstance(existing, Position3) and isinstance(value, (list, tuple)):
-            existing.data[:] = value
-        elif isinstance(existing, Velocity) and isinstance(value, (list, tuple)):
-            existing.Vx, existing.Vy, existing.omega = value
+#         if isinstance(existing, Position3) and isinstance(value, (list, tuple)):
+#             existing.data[:] = value
+#         elif isinstance(existing, Velocity) and isinstance(value, (list, tuple)):
+#             existing.Vx, existing.Vy, existing.omega = value
+#         else:
+#             setattr(obj, final, value)
+
+        # 如果目标是可调用对象，则作为函数执行
+        if callable(existing):
+            # 支持可迭代实参或单值实参
+            if isinstance(value, (list, tuple)):
+                existing(*value)
+            else:
+                existing(value)             
         else:
-            setattr(obj, final, value)
-            
+            if isinstance(existing, Position3) and isinstance(value, (list, tuple)):
+                existing.data[:] = value
+            elif isinstance(existing, Velocity) and isinstance(value, (list, tuple)):
+                existing.Vx, existing.Vy, existing.omega = value
+            else:
+                setattr(obj, final, value)
                 
         logger.debug(f"at handle_set_entry, {self.gait_prg.config}")
 #     def run(self):
