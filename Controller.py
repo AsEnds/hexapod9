@@ -5,7 +5,7 @@ from config.hexapod_config import HexapodConfig
 from ActionGroups.load_action_groups import action_groups
 from utils.thread_init import cmd_queue
 from utils.math import Position3, Velocity
-
+from utils.logger_tools import logger
 
 class Mode:
     """所有模式的基类，需实现 __next__。"""
@@ -34,7 +34,7 @@ class AutoMode(Mode):
             cfg.LegControl_round = (cfg.LegControl_round + 1) % cfg.N_POINTS
         else:
             cfg.LegControl_round = (cfg.LegControl_round - 1) % cfg.N_POINTS
-
+        logger.info(f"\nat AutoMode, cfg.LegControl_round= {cfg.LegControl_round}\n\n")
         # 计算步态与移动
         gp.CEN_and_pace_cal()
         gp.gait_programing(cfg.LegControl_round, cfg.N_POINTS, cfg.MIN_Z_PACE)
@@ -133,25 +133,49 @@ class Controller:
             existing.Vx, existing.Vy, existing.omega = value
         else:
             setattr(obj, final, value)
+            
+                
+        logger.debug(f"at handle_set_entry, {self.gait_prg.config}")
+#     def run(self):
+#         time.sleep(0.1)
+#         while True:
+#             cmd = cmd_queue.get(timeout=0.001)
+#             # 批量属性写入
+#             for entry in cmd.get("set", ()):  
+#                 self.handle_set_entry(*entry)
+#             # 模式切换
+#             self.handler.switch(cmd)
+#             # 步态执行与中断检测
+#             try:
+#                 next_cmd = cmd_queue.get_nowait()
+#             except Empty:
+#                 self.handler.step()
+#             else:
+#                 cmd_queue.put(next_cmd)
+#             cmd_queue.task_done()
 
     def run(self):
-        time.sleep(0.1)
+        time.sleep(0.1)  # 启动延迟
         while True:
-            cmd = cmd_queue.get(timeout=0.001)
-            # 批量属性写入
-            for entry in cmd.get("set", ()):  
-                self.handle_set_entry(*entry)
-            # 模式切换
-            self.handler.switch(cmd)
-            # 步态执行与中断检测
             try:
-                next_cmd = cmd_queue.get_nowait()
+                # 尝试获取命令，等待 1ms
+                cmd = cmd_queue.get(timeout=0.001)
             except Empty:
+                # 队列为空：执行自动步态
                 self.handler.step()
-            else:
-                cmd_queue.put(next_cmd)
-            cmd_queue.task_done()
+                continue  # 回到循环，继续尝试获取或执行步态
 
+            # 若获取到 cmd，则按原逻辑处理
+#             for entry in cmd.get("set", ()):
+#                 self.handle_set_entry(*entry)
+            for entry in cmd.get("set", ()):  # each entry should be (path, value)
+                if not isinstance(entry, (list, tuple)) or len(entry) != 2:
+                    logger.warning(f"Invalid set entry: {entry}")
+                    continue
+                self.handle_set_entry(entry[0], entry[1])
+
+            self.handler.switch(cmd)
+            cmd_queue.task_done()
 
 if __name__ == "__main__":
     Controller().run()

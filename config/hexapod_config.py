@@ -1,8 +1,23 @@
 # HexapodConfig.py
+import sys
+import os
+# 获取当前文件的父目录（假设当前在 project/subdir/path_setup.py）
+CONFIG = os.path.dirname(os.path.abspath(__file__))
+
+# 上一级目录，即项目根目录
+ROOT_DIR = os.path.dirname(CONFIG)
+
+# 添加到 sys.path
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 from dataclasses import dataclass, field
 import numpy as np
 import json
 import os
+
+from utils.logger_tools import logger
+
+PI = np.pi
 
 @dataclass
 class HexapodConfig:
@@ -42,8 +57,17 @@ class HexapodConfig:
     SMOOTH_BETA: float = 0.3
     # leg_num: int = 6
 
+    default_angles = [
+        [PI / 4, THETA_STAND_2, THETA_STAND_3],
+        [0, THETA_STAND_2, THETA_STAND_3],
+        [-PI / 4, THETA_STAND_2, THETA_STAND_3],
+        [3 * PI / 4, THETA_STAND_2, THETA_STAND_3],
+        [PI, THETA_STAND_2, THETA_STAND_3],
+        [5 * PI / 4, THETA_STAND_2, THETA_STAND_3],
+    ]
+
     # —— 从 JSON 加载的配置 —— 
-    config_file: str = "conf_pkg\leg_conf.json"
+    config_file: str = os.path.join(os.path.dirname(__file__), "leg_conf.json")
     dir_offsets: list = field(default_factory=list)
     legs: list        = field(default_factory=list)
     angle_offsets: list = field(default_factory=list)
@@ -57,6 +81,7 @@ class HexapodConfig:
         if os.path.exists(self.config_file):
             with open(self.config_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            logger.debug(f"\nat HexapodConfig,__post_init__: data = {data}\n\n")
         else:
             # JSON 缺失时的默认值
             data = {
@@ -64,6 +89,11 @@ class HexapodConfig:
                 "dir_offsets": [[1,1,1]]*6,
                 "angle_offsets": [[0,0,0]]*6
             }
+            
         self.dir_offsets    = data["dir_offsets"]
         self.legs           = data["legs"]
         self.angle_offsets  = data["angle_offsets"]
+        
+        logger.debug(f"\n\n at HexapodConfig,\n,self.dir_offsets={self.dir_offsets},\nself.legs={self.legs},\nself.angle_offsets={self.angle_offsets}")
+        
+        

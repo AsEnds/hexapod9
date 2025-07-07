@@ -3,7 +3,7 @@
 # import pod2 as pod
 from utils.thread_init import cmd_queue
 from utils.math import Position3, Velocity
-
+from utils.logger_tools import logger
 '''
 可以操作的gait_prg的属性
     gait_prg.body_pos : Position3()
@@ -16,6 +16,8 @@ from utils.math import Position3, Velocity
 
 # 按键按下回调
 def on_PSB_CROSS_press():
+    print("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (('gait_prg.body_pos', Position3(10,0,0)),
@@ -24,6 +26,7 @@ def on_PSB_CROSS_press():
                                 )
                     }
                   )
+    
 
 
 
@@ -33,7 +36,7 @@ def on_PSB_CIRCLE_press():
     cmd_queue.put(
                 {
                     'mode' : 'manual',
-                    'action_group' : 'xxx.json'
+                    'action_group' : '111.json'
                 }
     )
 
@@ -41,10 +44,28 @@ def on_PSB_CIRCLE_press():
 
 
 def on_PSB_SQUARE_press():
-    pass
+    print("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    cmd_queue.put({
+                        'mode' : 'auto',
+                        'set' : (('gait_prg.body_pos', Position3(0,0,50)),
+                                ('gait_prg.velocity', Velocity(50,0,0))
+                                
+                                )
+                    }
+                  )
 
 def on_PSB_TRIANGLE_press():
-    pass
+    print("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    cmd_queue.put({
+                        'mode' : 'auto',
+                        'set' : (('gait_prg.body_pos', Position3(0,0,50))
+                            
+                                
+                                )
+                    }
+                  )
 
 def on_PSB_L1_press():
     pass
@@ -92,4 +113,12 @@ def on_RIGHT_STICK_press(x, y):
 # 统一的按键松开回调
 def on_button_release():
     # pod.button_release()
-    pass
+    cmd_queue.put({
+                        'mode' : 'auto',
+                        'set' : (
+                                ('gait_prg.velocity', Velocity(0,0,0))
+                                
+                                )
+                    }
+                  )
+

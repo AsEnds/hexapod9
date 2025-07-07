@@ -517,7 +517,7 @@ class GaitPrg:
             self.setJointAngle(self.config.dir_offsets[leg_id][i],self.config.legs[leg_id][i],(thetas.angle[i]+self.config.angle_offsets[leg_id][i]),time)
             # print(f"i={i}")
 
-    def set_all_legs(self, leg_action: List[6], time: int = 500):
+    def set_all_legs(self, leg_action: List[int], time: int = 500):
         for i in range(6):
             self.set_leg(i, leg_action[i], time)
 
