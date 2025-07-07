@@ -1,11 +1,12 @@
+# controller_refactored.py
 from queue import Empty
 import time
+import _todo_path_setup
 from Hexapod import GaitPrg
 from config.hexapod_config import HexapodConfig
 from ActionGroups.load_action_groups import action_groups
 from utils.thread_init import cmd_queue
 from utils.math import Position3, Velocity
-
 
 class Mode:
     """所有模式的基类，需实现 __next__。"""
@@ -42,7 +43,7 @@ class AutoMode(Mode):
         gp.move(round_time, cfg.LegControl_round)
 
         elapsed = time.time() - start
-        time.sleep(max(round_time/1000 - elapsed, 0.001))
+        time.sleep(max(round_time / 1000 - elapsed, 0.001))
 
 
 class ManualMode(Mode):
@@ -78,27 +79,21 @@ class ModeHandler:
     def __init__(self, controller):
         self.controller = controller
         self.current_mode = None
-        self.mode_name = None
 
     def switch(self, cmd):
         mode = cmd.get("mode")
-        # 仅在模式实际变化时切换
-        if mode != self.mode_name:
-            # 关闭旧模式资源
-            if isinstance(self.current_mode, VisualMode):
-                self.current_mode.close()
-            # 创建并设置新模式
-            if mode == "auto":
-                self.current_mode = AutoMode(self.controller)
-            elif mode == "manual":
-                group = cmd.get("action_group")
-                self.current_mode = ManualMode(self.controller, group)
-            elif mode == "visual":
-                camera = cmd.get("camera")
-                self.current_mode = VisualMode(self.controller, camera)
-            else:
-                self.current_mode = None
-            self.mode_name = mode
+        if isinstance(self.current_mode, VisualMode):
+            self.current_mode.close()
+        if mode == "auto":
+            self.current_mode = AutoMode(self.controller)
+        elif mode == "manual":
+            group = cmd.get("action_group")
+            self.current_mode = ManualMode(self.controller, group)
+        elif mode == "visual":
+            camera = cmd.get("camera")  # 外部传入的摄像头对象
+            self.current_mode = VisualMode(self.controller, camera)
+        else:
+            self.current_mode = None
 
     def step(self):
         if self.current_mode is not None:
@@ -106,7 +101,6 @@ class ModeHandler:
                 next(self.current_mode)
             except StopIteration:
                 self.current_mode = None
-                self.mode_name = None
 
 
 class Controller:
@@ -116,40 +110,30 @@ class Controller:
         self.handler = ModeHandler(self)
 
     def handle_set_entry(self, target_path, value):
-        """
-        按路径设置属性，支持 Position3/Velocity 解包及普通属性赋值。
-        """
         obj = self
-        parts = target_path.split(".")
-        # 逐级获取对象
-        for attr in parts[:-1]:
+        for attr in target_path.split("."):
             obj = getattr(obj, attr)
-        final = parts[-1]
-        existing = getattr(obj, final)
-
-        if isinstance(existing, Position3) and isinstance(value, (list, tuple)):
-            existing.data[:] = value
-        elif isinstance(existing, Velocity) and isinstance(value, (list, tuple)):
-            existing.Vx, existing.Vy, existing.omega = value
+        if isinstance(obj, Position3) and isinstance(value, (list, tuple)):
+            obj.data[:] = value
+        elif isinstance(obj, Velocity) and isinstance(value, (list, tuple)):
+            obj.Vx, obj.Vy, obj.omega = value
         else:
-            setattr(obj, final, value)
+            raise AttributeError(f"Unsupported path: {target_path}")
 
     def run(self):
         time.sleep(0.1)
         while True:
-            cmd = cmd_queue.get()
-            # 批量属性写入
-            for entry in cmd.get("set", ()):  
+            cmd = cmd_queue.get()  # 阻塞获取
+            for entry in cmd.get("set", ()):
                 self.handle_set_entry(*entry)
-            # 模式切换
+
             self.handler.switch(cmd)
-            # 步态执行与中断检测
             try:
                 next_cmd = cmd_queue.get_nowait()
+                cmd_queue.put(next_cmd)
             except Empty:
                 self.handler.step()
-            else:
-                cmd_queue.put(next_cmd)
+
             cmd_queue.task_done()
 
 

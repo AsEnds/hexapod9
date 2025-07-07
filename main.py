@@ -9,7 +9,7 @@ import logging
 sys.path.append('/home/pi/SpiderPi/')
 
 import Joystick as js
-import Controller_new as controller
+import Controller as controller
 
 def start_threads():
     # 配置日志
