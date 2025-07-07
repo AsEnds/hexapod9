@@ -137,7 +137,7 @@ class Controller:
     def run(self):
         time.sleep(0.1)
         while True:
-            cmd = cmd_queue.get()
+            cmd = cmd_queue.get(timeout=0.001)
             # 批量属性写入
             for entry in cmd.get("set", ()):  
                 self.handle_set_entry(*entry)
