@@ -6,7 +6,7 @@ import os
 import json
 
 from typing import List
-from config.HexapodConfig import HexapodConfig
+from config.hexapod_config import HexapodConfig
 
 
 

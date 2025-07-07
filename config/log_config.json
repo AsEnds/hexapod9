@@ -1,0 +1,5 @@
+{
+  "log_level": "DEBUG",
+  "log_to_file": true,
+  "log_file_path": "config/logs/app.log"
+}

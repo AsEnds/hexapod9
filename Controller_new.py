@@ -1,7 +1,7 @@
 # Controller.py
 
 from Hexapod import GaitPrg
-from config.HexapodConfig import HexapodConfig
+from config.hexapod_config import HexapodConfig
 from ActionGroups.load_action_groups import action_groups  # 预加载的动作组
 from utils.thread_init import cmd_queue
 from utils.math import Position3, Velocity

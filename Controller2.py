@@ -1,5 +1,5 @@
 from Hexapod import GaitPrg
-from config.HexapodConfig import HexapodConfig
+from config.hexapod_config import HexapodConfig
 from utils.thread_init import cmd_queue, controller_lock
 from utils.math import Position3, Velocity
 from ActionGroups.load_action_groups import action_groups
