@@ -4,7 +4,7 @@ import sys
 import time
 import threading
 import logging
-
+#################
 # 确保项目根目录在 sys.path 中
 sys.path.append('/home/pi/SpiderPi/')
 
@@ -23,9 +23,12 @@ def start_threads():
         name="JoystickThread",
         daemon=True
     )
+
+
+    ctrl = controller.Controller()
     # 启动控制器主循环线程
     th_ctrl = threading.Thread(
-        target=controller.main,
+        target=ctrl.run,
         name="ControllerThread",
         daemon=True
     )
