@@ -6,7 +6,7 @@ from utils.math import Position3, Velocity
 from utils.logger_tools import logger
 '''
 可以操作的gait_prg的属性
-    gait_prg.body_pos : Position3()
+    gait_prg.set_body_position(Position3())
     gait_prg.velocity : Velocity()
     gait_prg.config.RATIO : float
     gait_prg.config.MAX_SPEED : float
@@ -20,10 +20,8 @@ def on_PSB_CROSS_press():
     logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
-                        'set' : (('gait_prg.body_pos', Position3(10,0,0)),
-                                ('gait_prg.velocity', Velocity(100,0,0))
-                                
-                                )
+                        'set' : (('gait_prg.set_body_position', Position3(10,0,0)),
+                                ('gait_prg.velocity', Velocity(100,0,0)),)
                     }
                   )
     
@@ -36,7 +34,7 @@ def on_PSB_CIRCLE_press():
     cmd_queue.put(
                 {
                     'mode' : 'manual',
-                    'action_group' : '111.json'
+                    'action_group' : 'A02.json'
                 }
     )
 
@@ -48,10 +46,8 @@ def on_PSB_SQUARE_press():
     logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
-                        'set' : (('gait_prg.body_pos', Position3(0,0,50)),
-                                ('gait_prg.velocity', Velocity(50,0,0))
-                                
-                                )
+                        'set' : (('gait_prg.set_body_position', Position3(10,0,0)),
+                                ('gait_prg.velocity', Velocity(50,0,0)),)
                     }
                   )
 
@@ -60,15 +56,19 @@ def on_PSB_TRIANGLE_press():
     logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
     cmd_queue.put({
                         'mode' : 'auto',
-                        'set' : (('gait_prg.body_pos', Position3(0,0,50))
-                            
-                                
-                                )
+                        'set' : (('gait_prg.set_body_position', Position3(10,0,0)),)
                     }
                   )
 
 def on_PSB_L1_press():
-    pass
+    print("\nat joystick_cb, CROSS_PRESS\n\n")
+    logger.debug("\nat joystick_cb, CROSS_PRESS\n\n")
+    cmd_queue.put({
+                        'mode' : 'auto',
+                        'set' : (('gait_prg.set_body_position', Position3(10,0,0)),)
+                    }
+                  )
+
 
 def on_PSB_R1_press():
     pass
@@ -116,9 +116,7 @@ def on_button_release():
     cmd_queue.put({
                         'mode' : 'auto',
                         'set' : (
-                                ('gait_prg.velocity', Velocity(0,0,0))
-                                
-                                )
+                                ('gait_prg.velocity', Velocity(0,0,0)),)
                     }
                   )
 
