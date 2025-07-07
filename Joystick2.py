@@ -1,111 +1,58 @@
-# Joystick.py
-import sys
-import os
 import time
 import pygame
 import joystick_callbacks as cb
 
-# 可选地添加 Raspberry Pi 路径
-spi_path = '/home/pi/SpiderPi/'
-if os.path.exists(spi_path):
-    sys.path.append(spi_path)
-
-# PS 手柄按钮映射
+# 键盘映射：key name → 模拟按钮名
 key_map = {
-    "PSB_CROSS": 0,  "PSB_CIRCLE": 1,   "PSB_SQUARE": 3,   "PSB_TRIANGLE": 4,
-    "PSB_L1": 6,     "PSB_R1": 7,       "PSB_L2": 8,       "PSB_R2": 9,
-    "PSB_SELECT": 10,"PSB_START": 11
+    pygame.K_j: "PSB_CROSS",
+    pygame.K_k: "PSB_CIRCLE",
+    pygame.K_u: "PSB_SQUARE",
+    pygame.K_l: "PSB_TRIANGLE",
+    pygame.K_a: "PSB_L1",
+    pygame.K_d: "PSB_R1",
+    pygame.K_s: "PSB_L2",
+    pygame.K_f: "PSB_R2",
+    pygame.K_q: "PSB_SELECT",
+    pygame.K_e: "PSB_START",
+    pygame.K_LEFT:  "HAT_LEFT",
+    pygame.K_RIGHT: "HAT_RIGHT",
+    pygame.K_UP:    "HAT_UP",
+    pygame.K_DOWN:  "HAT_DOWN",
 }
 
 DEBOUNCE_INTERVAL = 0.05
-button_states = {key: False for key in key_map}
-last_press_time = {key: 0.0 for key in key_map}
-hat_flag = False
+key_states = {k: False for k in key_map}  # 按键状态（去抖）
+last_press_time = {k: 0 for k in key_map}
 
 
-def joystick_init():
-    """初始化 Joystick 实例"""
-    if os.name != 'nt':
-        os.environ["SDL_VIDEODRIVER"] = "dummy"
-        pygame.display.init()
-    pygame.joystick.init()
-    js = pygame.joystick.Joystick(0)
-    js.init()
-    print(f"Joystick initialized: {js.get_name()} | Axes: {js.get_numaxes()} | Buttons: {js.get_numbuttons()} | Hats: {js.get_numhats()}")
-    return js
-
-
-def get_joystick_data():
-    """主循环：仅在未连接时检测设备，已连接时处理输入"""
-    global hat_flag
+def get_keyboard_data():
     pygame.init()
-    connected = False
-    js = None
+    screen = pygame.display.set_mode((100, 100))  # 必须启用窗口，才能获取键盘事件
+    pygame.display.set_caption("Keyboard Simulation")
 
-    while True:
-        if not connected:
-            # 检测并初始化设备
-            pygame.joystick.quit()
-            pygame.joystick.init()
-            if pygame.joystick.get_count() > 0:
-                try:
-                    js = joystick_init()
-                    connected = True
-                    print("Joystick connected.")
-                except Exception as e:
-                    print("Init error:", e)
-                    js = None
-        else:
-            # 检查是否断开
-            if pygame.joystick.get_count() == 0:
-                print("Joystick disconnected.")
-                connected = False
-                js = None
-            else:
-                # 处理输入事件
-                pygame.event.pump()
-                now = time.time()
+    running = True
+    while running:
+        now = time.time()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-                # 按键按下/松开
-                for button, idx in key_map.items():
-                    pressed = False
-                    try:
-                        pressed = bool(js.get_button(idx))
-                    except Exception:
-                        pass
-                    if pressed and not button_states[button]:
-                        if now - last_press_time[button] > DEBOUNCE_INTERVAL:
-                            func = getattr(cb, f"on_{button}_press", None)
-                            if callable(func): func()
-                            button_states[button] = True
-                            last_press_time[button] = now
-                    elif not pressed and button_states[button]:
-                        cb.on_button_release()
-                        button_states[button] = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key in key_map and not key_states[event.key]:
+                    if now - last_press_time[event.key] > DEBOUNCE_INTERVAL:
+                        key_states[event.key] = True
+                        last_press_time[event.key] = now
+                        btn = key_map[event.key]
+                        func = getattr(cb, f"on_{btn}_press", None)
+                        if callable(func): func()
 
-                # 摇杆 (Axes)
-                lx1, ly1 = js.get_axis(0), js.get_axis(1)
-                if abs(lx1) > 1e-3 or abs(ly1) > 1e-3:
-                    cb.on_LEFT_STICK_press(lx1, ly1)
-                lx2, ly2 = js.get_axis(2), js.get_axis(3)
-                if abs(lx2) > 1e-3 or abs(ly2) > 1e-3:
-                    cb.on_RIGHT_STICK_press(lx2, ly2)
-
-                # 方向帽 (Hat)
-                hat_x, hat_y = js.get_hat(0)
-                if (hat_x, hat_y) != (0, 0):
-                    if not hat_flag:
-                        if hat_x == 1: cb.on_HAT_RIGHT_press()
-                        elif hat_x == -1: cb.on_HAT_LEFT_press()
-                        if hat_y == 1: cb.on_HAT_UP_press()
-                        elif hat_y == -1: cb.on_HAT_DOWN_press()
-                        hat_flag = True
-                else:
-                    if hat_flag:
-                        cb.on_button_release()
-                        hat_flag = False
+            elif event.type == pygame.KEYUP:
+                if event.key in key_map:
+                    key_states[event.key] = False
+                    cb.on_button_release()
 
         time.sleep(0.01)
 
+
 if __name__ == "__main__":
-    get_joystick_data()
+    get_keyboard_data()

@@ -34,7 +34,7 @@ class AutoMode(Mode):
             cfg.LegControl_round = (cfg.LegControl_round + 1) % cfg.N_POINTS
         else:
             cfg.LegControl_round = (cfg.LegControl_round - 1) % cfg.N_POINTS
-        logger.info(f"\nat AutoMode, cfg.LegControl_round= {cfg.LegControl_round}\n\n")
+        # logger.info(f"\nat AutoMode, cfg.LegControl_round= {cfg.LegControl_round}\n\n")
         # 计算步态与移动
         gp.CEN_and_pace_cal()
         gp.gait_programing(cfg.LegControl_round, cfg.N_POINTS, cfg.MIN_Z_PACE)
